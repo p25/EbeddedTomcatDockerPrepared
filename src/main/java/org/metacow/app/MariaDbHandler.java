@@ -7,18 +7,22 @@ public class MariaDbHandler {
 
     private static String CON_STR = null;
     private static MariaDbHandler instance = null;
+    private static String dbUser = null;
+    private static String dbPassword = null;
 
-    public static synchronized MariaDbHandler getInstance(String connectionString) throws SQLException{
+    public static synchronized MariaDbHandler getInstance(String connectionString, String dbUser, String dbPassword) throws SQLException{
         if (instance == null)
-            instance = new MariaDbHandler(connectionString);
+            instance = new MariaDbHandler(connectionString, dbUser, dbPassword);
         return instance;
     }
 
     private Connection connection;
 
-    private MariaDbHandler(String connectionString) throws SQLException{
+    private MariaDbHandler(String connectionString, String dbUser, String dbPassword) throws SQLException{
         CON_STR = connectionString;
-        this.connection = DriverManager.getConnection(CON_STR, "root", "password");
+        this.dbUser = dbUser;
+        this.dbPassword = dbPassword;
+        this.connection = DriverManager.getConnection(CON_STR, dbUser, dbPassword);
     }
 
     public void createTable(String tableName){
@@ -43,8 +47,8 @@ public class MariaDbHandler {
 
     public ArrayList<String> selectAll()throws SQLException{
         ArrayList<String> arrayList = new ArrayList<String>();
+
         try (Statement stmt = this.connection.createStatement()) {
-            //execute query
             try (ResultSet rs = stmt.executeQuery("SELECT * FROM cat")) {
                 while (rs.next()) {
                     String id = rs.getString(1);
@@ -54,13 +58,15 @@ public class MariaDbHandler {
                     System.out.println(id + tags+ date + filename);
                     arrayList.add(id + tags+ date + filename);
                 }
-
-                //rs.first();
-                //System.out.println(rs.getString(1) + rs.getString(2) + rs.getString(3) + rs.getString(4)); //result is "Hello World!"
             }
+        }catch (SQLNonTransientConnectionException see){
+            this.connection = DriverManager.getConnection(CON_STR, dbUser, dbPassword);
+            arrayList.add(see.getMessage());
+            arrayList.add("driver reconnection");
+            return arrayList;
         }
-        return arrayList;
 
+        return arrayList;
     }
 
 

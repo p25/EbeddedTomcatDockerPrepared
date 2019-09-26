@@ -18,11 +18,12 @@ import org.apache.catalina.startup.Tomcat;
 public class App {
 
     public static void main( String[] args )throws Exception{
+        LoadConf config = new LoadConf(new File("config.json"));
         Tomcat tomcat = new Tomcat();
-        tomcat.setBaseDir("temp");
-        tomcat.setPort(8080);
-        final MariaDbHandler mariaDbHandler = MariaDbHandler.getInstance("jdbc:mariadb://172.17.0.3/testdatabase");
-        ArrayList<String> ttt = new ArrayList<String>();
+        tomcat.setBaseDir(config.getTempDir());
+        tomcat.setPort(config.getTomcatHttpPort());
+        final MariaDbHandler mariaDbHandler = MariaDbHandler.getInstance(config.returnDBConnectionString(), config.getDbUser(), config.getDbPassword());
+
         String contextPath = "/";
         String docBase = new File(".").getAbsolutePath();
          

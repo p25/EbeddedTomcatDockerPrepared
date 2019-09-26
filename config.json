@@ -1,0 +1,9 @@
+{
+
+  "DBConnectionString":"jdbc:mariadb://172.22.33.7/testdatabase",
+  "dbUser": "root",
+  "dbPassword": "password",
+  "tomcatHttpPort": "8080",
+  "tempDir": "temp"
+
+}
